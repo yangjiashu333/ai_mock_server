@@ -1,3 +1,6 @@
+// Load environment variables
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -28,8 +31,8 @@ app.use(
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // Default: 15 minutes
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // Default: 100 requests per windowMs
   message: {
     error: 'Too many requests from this IP, please try again later.'
   }
@@ -37,17 +40,20 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Logging middleware
-app.use(morgan('combined'));
+app.use(morgan(process.env.LOG_LEVEL || 'combined'));
 
 // Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+const maxFileSize = process.env.MAX_FILE_SIZE || '10mb';
+app.use(express.json({ limit: maxFileSize }));
+app.use(express.urlencoded({ extended: true, limit: maxFileSize }));
 
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({
     message: 'AI Mock Server is running!',
-    version: '1.0.0',
+    name: process.env.APP_NAME || 'AI Mock Server',
+    version: process.env.APP_VERSION || '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
     timestamp: new Date().toISOString(),
     port: PORT,
     endpoints: {

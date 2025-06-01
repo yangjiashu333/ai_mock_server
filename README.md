@@ -15,6 +15,7 @@ A robust Express.js mock server application with built-in security, validation, 
 - 🔍 ESLint for code quality and consistency
 - 🎨 Prettier for automatic code formatting
 - 🪝 Git hooks for automated quality checks
+- 🌍 Environment-based configuration with dotenv
 
 ## Quick Start
 
@@ -31,19 +32,72 @@ A robust Express.js mock server application with built-in security, validation, 
 npm install
 ```
 
-2. Start the development server:
+2. Set up environment variables:
+
+```bash
+cp env.example .env
+```
+
+Edit the `.env` file with your preferred configuration.
+
+3. Start the development server:
 
 ```bash
 npm run dev
 ```
 
-3. Or start the production server:
+4. Or start the production server:
 
 ```bash
 npm start
 ```
 
 The server will be running at `http://localhost:8101`
+
+## Environment Configuration
+
+The application uses environment variables for configuration. Copy `env.example` to `.env` and customize the values:
+
+```bash
+cp env.example .env
+```
+
+### Available Environment Variables
+
+| Variable                  | Description                            | Default          | Example                                      |
+| ------------------------- | -------------------------------------- | ---------------- | -------------------------------------------- |
+| `NODE_ENV`                | Application environment                | `development`    | `development`, `production`, `test`          |
+| `PORT`                    | Server port                            | `8101`           | `3000`, `8080`                               |
+| `ALLOWED_ORIGINS`         | CORS allowed origins (comma-separated) | `*`              | `http://localhost:3000,https://example.com`  |
+| `SECRET_KEY`              | Application secret key                 | (none)           | `your-secret-key-change-in-production`       |
+| `RATE_LIMIT_WINDOW_MS`    | Rate limit time window (milliseconds)  | `900000`         | `900000` (15 minutes)                        |
+| `RATE_LIMIT_MAX_REQUESTS` | Max requests per time window           | `100`            | `200`, `50`                                  |
+| `LOG_LEVEL`               | Morgan logging level                   | `combined`       | `combined`, `common`, `dev`, `short`, `tiny` |
+| `APP_NAME`                | Application name                       | `AI Mock Server` | `My Custom Server`                           |
+| `APP_VERSION`             | Application version                    | `1.0.0`          | `2.1.0`                                      |
+| `MAX_FILE_SIZE`           | Maximum file upload size               | `10mb`           | `50mb`, `1gb`                                |
+
+### Example .env file:
+
+```env
+NODE_ENV=development
+PORT=8101
+ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8080
+SECRET_KEY=my-secret-key-for-development
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+LOG_LEVEL=combined
+APP_NAME=AI Mock Server
+APP_VERSION=1.0.0
+MAX_FILE_SIZE=10mb
+```
+
+### Security Notes:
+
+- Never commit `.env` files to version control
+- Change `SECRET_KEY` in production environments
+- Use restrictive `ALLOWED_ORIGINS` in production
+- Adjust rate limiting based on your needs
 
 ## API Endpoints
 
