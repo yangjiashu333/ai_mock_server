@@ -14,6 +14,7 @@ A robust Express.js mock server application with built-in security, validation, 
 - 📁 Modular router structure
 - 🔍 ESLint for code quality and consistency
 - 🎨 Prettier for automatic code formatting
+- 🪝 Git hooks for automated quality checks
 
 ## Quick Start
 
@@ -202,17 +203,31 @@ This project uses a comprehensive code quality setup:
 - **Purpose**: Automatic code formatting and style consistency
 - **Documentation**: See [PRETTIER_SETUP.md](PRETTIER_SETUP.md)
 
+#### Git Hooks (Automated Quality)
+
+- **Tool**: Husky + lint-staged for Git hook management
+- **Pre-commit**: Runs ESLint and Prettier on staged files only
+- **Pre-push**: Runs comprehensive code quality checks
+- **Purpose**: Prevents bad code from entering the repository
+- **Documentation**: See [GIT_HOOKS_SETUP.md](GIT_HOOKS_SETUP.md)
+
 #### Integration
 
 - **No Conflicts**: ESLint and Prettier work together seamlessly
 - **Unified Commands**: Use `npm run code:fix` for comprehensive cleanup
+- **Automatic Enforcement**: Git hooks ensure quality without manual intervention
 - **Editor Support**: Works with VS Code, WebStorm, and other popular editors
 
-**Before committing code:**
+**Development workflow:**
 
 ```bash
+# The hooks handle quality automatically, but you can run manually:
 npm run code:fix    # Fix both linting and formatting issues
 npm run code:check  # Verify code quality and formatting
+
+# Git operations trigger hooks automatically:
+git commit -m "Your changes"  # Runs pre-commit hook (lint-staged)
+git push                      # Runs pre-push hook (full code check)
 ```
 
 ### Project Structure
@@ -224,9 +239,13 @@ ai_mock_server/
 ├── eslint.config.js       # ESLint configuration
 ├── .prettierrc.js         # Prettier configuration
 ├── .prettierignore        # Prettier ignore patterns
+├── .husky/                # Git hooks directory
+│   ├── pre-commit         # Pre-commit hook script
+│   └── pre-push           # Pre-push hook script
 ├── README.md             # This file
 ├── ESLINT_SETUP.md       # ESLint documentation
 ├── PRETTIER_SETUP.md     # Prettier documentation
+├── GIT_HOOKS_SETUP.md    # Git hooks documentation
 └── routes/               # Router modules
     ├── index.js          # Centralized router exports
     ├── users.js          # User management routes
