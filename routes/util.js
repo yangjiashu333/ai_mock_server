@@ -18,7 +18,7 @@ router.all('/echo', (req, res) => {
 router.get('/delay/:seconds', (req, res) => {
   const seconds = parseInt(req.params.seconds) || 1;
   const delay = Math.min(Math.max(seconds, 0), 10); // Limit to 0-10 seconds
-  
+
   setTimeout(() => {
     res.json({
       success: true,
@@ -29,4 +29,4 @@ router.get('/delay/:seconds', (req, res) => {
   }, delay * 1000);
 });
 
-module.exports = router; 
+module.exports = router;

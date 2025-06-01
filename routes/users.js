@@ -17,7 +17,7 @@ router.get('/', (req, res) => {
     { id: 2, name: 'Jane Smith', email: 'jane@example.com', age: 25 },
     { id: 3, name: 'Bob Johnson', email: 'bob@example.com', age: 35 }
   ];
-  
+
   res.json({
     success: true,
     data: users,
@@ -28,7 +28,7 @@ router.get('/', (req, res) => {
 // Get user by ID
 router.get('/:id', (req, res) => {
   const userId = parseInt(req.params.id);
-  
+
   // Input validation
   if (isNaN(userId) || userId <= 0) {
     return res.status(400).json({
@@ -36,15 +36,15 @@ router.get('/:id', (req, res) => {
       error: 'Invalid user ID. Must be a positive integer.'
     });
   }
-  
+
   // Mock user lookup
-  const user = { 
-    id: userId, 
-    name: `User ${userId}`, 
-    email: `user${userId}@example.com`, 
-    age: 25 + userId 
+  const user = {
+    id: userId,
+    name: `User ${userId}`,
+    email: `user${userId}@example.com`,
+    age: 25 + userId
   };
-  
+
   res.json({
     success: true,
     data: user
@@ -55,7 +55,7 @@ router.get('/:id', (req, res) => {
 router.post('/', (req, res) => {
   // Validate request body
   const { error, value } = userSchema.validate(req.body);
-  
+
   if (error) {
     return res.status(400).json({
       success: false,
@@ -63,14 +63,14 @@ router.post('/', (req, res) => {
       details: error.details.map(detail => detail.message)
     });
   }
-  
+
   // Mock user creation
   const newUser = {
     id: Math.floor(Math.random() * 1000) + 1,
     ...value,
     createdAt: new Date().toISOString()
   };
-  
+
   res.status(201).json({
     success: true,
     message: 'User created successfully',
@@ -81,7 +81,7 @@ router.post('/', (req, res) => {
 // Update user (PUT)
 router.put('/:id', (req, res) => {
   const userId = parseInt(req.params.id);
-  
+
   // Input validation for ID
   if (isNaN(userId) || userId <= 0) {
     return res.status(400).json({
@@ -89,10 +89,10 @@ router.put('/:id', (req, res) => {
       error: 'Invalid user ID. Must be a positive integer.'
     });
   }
-  
+
   // Validate request body
   const { error, value } = userSchema.validate(req.body);
-  
+
   if (error) {
     return res.status(400).json({
       success: false,
@@ -100,14 +100,14 @@ router.put('/:id', (req, res) => {
       details: error.details.map(detail => detail.message)
     });
   }
-  
+
   // Mock user update
   const updatedUser = {
     id: userId,
     ...value,
     updatedAt: new Date().toISOString()
   };
-  
+
   res.json({
     success: true,
     message: 'User updated successfully',
@@ -118,7 +118,7 @@ router.put('/:id', (req, res) => {
 // Delete user
 router.delete('/:id', (req, res) => {
   const userId = parseInt(req.params.id);
-  
+
   // Input validation
   if (isNaN(userId) || userId <= 0) {
     return res.status(400).json({
@@ -126,7 +126,7 @@ router.delete('/:id', (req, res) => {
       error: 'Invalid user ID. Must be a positive integer.'
     });
   }
-  
+
   // Mock user deletion
   res.json({
     success: true,
@@ -135,4 +135,4 @@ router.delete('/:id', (req, res) => {
   });
 });
 
-module.exports = router; 
+module.exports = router;

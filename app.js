@@ -8,6 +8,7 @@ const rateLimit = require('express-rate-limit');
 const usersRouter = require('./routes/users');
 const utilRouter = require('./routes/util');
 const healthRouter = require('./routes/health');
+const aiMockRouter = require('./routes/ai-mock');
 
 const app = express();
 const PORT = process.env.PORT || 8101;
@@ -16,10 +17,14 @@ const PORT = process.env.PORT || 8101;
 app.use(helmet());
 
 // CORS configuration
-app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(',')
+      : '*',
+    credentials: true
+  })
+);
 
 // Rate limiting
 const limiter = rateLimit({
@@ -48,7 +53,8 @@ app.get('/', (req, res) => {
     endpoints: {
       health: '/health',
       util: '/api/util',
-      users: '/api/users'
+      users: '/api/users',
+      aiMock: '/api/ai-mock'
     }
   });
 });
@@ -57,6 +63,7 @@ app.get('/', (req, res) => {
 app.use('/health', healthRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/util', utilRouter);
+app.use('/api/ai-mock', aiMockRouter);
 
 // 404 handler for undefined routes
 app.use('*', (req, res) => {
@@ -70,7 +77,7 @@ app.use('*', (req, res) => {
 // Global error handler
 app.use((err, req, res, next) => {
   console.error('Error:', err);
-  
+
   // Handle different types of errors
   if (err.type === 'entity.parse.failed') {
     return res.status(400).json({
@@ -78,14 +85,14 @@ app.use((err, req, res, next) => {
       error: 'Invalid JSON in request body'
     });
   }
-  
+
   if (err.type === 'entity.too.large') {
     return res.status(413).json({
       success: false,
       error: 'Request entity too large'
     });
   }
-  
+
   // Generic error response
   res.status(err.status || 500).json({
     success: false,
@@ -118,4 +125,4 @@ process.on('SIGINT', () => {
   });
 });
 
-module.exports = app; 
+module.exports = app;
