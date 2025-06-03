@@ -1,6 +1,5 @@
 // Load environment variables
 require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -29,15 +28,69 @@ app.use(
   })
 );
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // Default: 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // Default: 100 requests per windowMs
+// Enhanced Rate limiting configuration
+// Global rate limiter - more permissive for general use
+const globalLimiter = rateLimit({
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 5000, // 5000 requests per 15 minutes
   message: {
-    error: 'Too many requests from this IP, please try again later.'
+    error: 'Too many requests from this IP, please try again later.',
+    retryAfter: Math.ceil(
+      (parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000) / 1000
+    )
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  // Skip successful requests to certain endpoints
+  skip: (req, res) => {
+    // Skip rate limiting for health checks and static content
+    return req.path === '/health' || req.path === '/';
+  },
+  // Custom key generator for more granular control
+  keyGenerator: req => {
+    // Use forwarded IP if behind proxy, otherwise use connection IP
+    return req.ip || req.connection.remoteAddress;
   }
 });
-app.use(limiter);
+
+// Strict rate limiter for AI endpoints (more resource intensive)
+const aiLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: parseInt(process.env.AI_RATE_LIMIT_MAX) || 100, // 100 AI requests per minute
+  message: {
+    error: 'Too many AI requests from this IP, please try again later.',
+    retryAfter: 60
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Lenient rate limiter for utility endpoints
+const utilLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: parseInt(process.env.UTIL_RATE_LIMIT_MAX) || 200, // 200 utility requests per minute
+  message: {
+    error: 'Too many utility requests from this IP, please try again later.',
+    retryAfter: 60
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// User operations rate limiter
+const userLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: parseInt(process.env.USER_RATE_LIMIT_MAX) || 300, // 300 user requests per minute
+  message: {
+    error: 'Too many user requests from this IP, please try again later.',
+    retryAfter: 60
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Apply global rate limiter
+app.use(globalLimiter);
 
 // Logging middleware
 app.use(morgan(process.env.LOG_LEVEL || 'combined'));
@@ -47,7 +100,7 @@ const maxFileSize = process.env.MAX_FILE_SIZE || '10mb';
 app.use(express.json({ limit: maxFileSize }));
 app.use(express.urlencoded({ extended: true, limit: maxFileSize }));
 
-// Root endpoint
+// Root endpoint (no additional rate limiting)
 app.get('/', (req, res) => {
   res.json({
     message: 'AI Mock Server is running!',
@@ -61,15 +114,21 @@ app.get('/', (req, res) => {
       util: '/api/util',
       users: '/api/users',
       aiMock: '/api/ai-mock'
+    },
+    rateLimits: {
+      global: `${parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 5000} requests per ${Math.ceil((parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000) / 60000)} minutes`,
+      ai: `${parseInt(process.env.AI_RATE_LIMIT_MAX) || 100} requests per minute`,
+      util: `${parseInt(process.env.UTIL_RATE_LIMIT_MAX) || 200} requests per minute`,
+      user: `${parseInt(process.env.USER_RATE_LIMIT_MAX) || 300} requests per minute`
     }
   });
 });
 
-// Mount routers
-app.use('/health', healthRouter);
-app.use('/api/users', usersRouter);
-app.use('/api/util', utilRouter);
-app.use('/api/ai-mock', aiMockRouter);
+// Mount routers with specific rate limiters
+app.use('/health', healthRouter); // No additional rate limiting for health checks
+app.use('/api/users', userLimiter, usersRouter);
+app.use('/api/util', utilLimiter, utilRouter);
+app.use('/api/ai-mock', aiLimiter, aiMockRouter);
 
 // 404 handler for undefined routes
 app.use('*', (req, res) => {
@@ -83,6 +142,16 @@ app.use('*', (req, res) => {
 // Global error handler
 app.use((err, req, res, next) => {
   console.error('Error:', err);
+
+  // Handle rate limit errors specifically
+  if (err.status === 429) {
+    return res.status(429).json({
+      success: false,
+      error: 'Rate limit exceeded',
+      message: err.message,
+      retryAfter: err.retryAfter
+    });
+  }
 
   // Handle different types of errors
   if (err.type === 'entity.parse.failed') {
@@ -114,9 +183,23 @@ const server = app.listen(PORT, () => {
   console.log(`🏥 Health check: http://localhost:${PORT}/health`);
   console.log(`👥 Users API: http://localhost:${PORT}/api/users`);
   console.log(`🔧 Utility API: http://localhost:${PORT}/api/util`);
+  console.log(`🤖 AI Mock API: http://localhost:${PORT}/api/ai-mock`);
+  console.log(`📊 Rate Limits:`);
+  console.log(
+    `   Global: ${parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 5000} req/15min`
+  );
+  console.log(
+    `   AI: ${parseInt(process.env.AI_RATE_LIMIT_MAX) || 100} req/min`
+  );
+  console.log(
+    `   Util: ${parseInt(process.env.UTIL_RATE_LIMIT_MAX) || 200} req/min`
+  );
+  console.log(
+    `   User: ${parseInt(process.env.USER_RATE_LIMIT_MAX) || 300} req/min`
+  );
 });
 
-// Graceful shutdown handling - moved after server declaration
+// Graceful shutdown handling
 process.on('SIGTERM', () => {
   console.log('SIGTERM received. Shutting down gracefully...');
   server.close(() => {
