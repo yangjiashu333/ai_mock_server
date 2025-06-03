@@ -49,62 +49,68 @@ router.get('/get_yaml_files', (req, res) => {
       {
         name: 'ppo',
         task: 'preprocessing',
-        'training config': [
+        training_config: [
           '/home/lab1523/Project/CVRL/CV-RL-PR/RL/config/ppo_prepro_train.yaml'
         ],
-        'validation config': [
+        validation_config: [
           '/home/lab1523/Project/CVRL/CV-RL-PR/RL/config/ppo_prepro_test.yaml'
-        ]
+        ],
+        weights: ['-RL-PR/RL/config/c51_cl_train.yaml']
       },
       {
         name: 'dqn',
         task: 'search',
-        'training config': [
+        training_config: [
           '/home/lab1523/Project/CVRL/CV-RL-PR/RL/config/dqn_search_train.yaml'
         ],
-        'validation config': [
+        validation_config: [
           '/home/lab1523/Project/CVRL/CV-RL-PR/RL/config/dqn_search_test.yaml'
-        ]
+        ],
+        weights: ['-RL-PR/RL/config/c51_cl_train.yaml']
       },
       {
         name: 'c51',
         task: 'classification',
-        'training config': [
+        training_config: [
           '/home/lab1523/Project/CVRL/CV-RL-PR/RL/config/c51_cl_train.yaml'
         ],
-        'validation config': [
+        validation_config: [
           '/home/lab1523/Project/CVRL/CV-RL-PR/RL/config/c51_cl_test.yaml'
-        ]
+        ],
+        weights: ['-RL-PR/RL/config/c51_cl_train.yaml']
       },
       {
         name: 'dqn',
         task: 'preprocessing',
-        'training config': [
+        training_config: [
           '/home/lab1523/Project/CVRL/CV-RL-PR/RL/config/dqn_prepro_train.yaml'
         ],
-        'validation config': [
+        validation_config: [
           '/home/lab1523/Project/CVRL/CV-RL-PR/RL/config/dqn_prepro_test.yaml'
-        ]
+        ],
+        weights: ['-RL-PR/RL/config/c51_cl_train.yaml']
       },
       {
         name: 'ppo',
         task: 'classification',
-        'training config': [
+        training_config: [
           '/home/lab1523/Project/CVRL/CV-RL-PR/RL/config/ppo_cl_train.yaml'
         ],
-        'validation config': [
+        validation_config: [
           '/home/lab1523/Project/CVRL/CV-RL-PR/RL/config/ppo_cl_test.yaml'
-        ]
+        ],
+        weights: ['-RL-PR/RL/config/c51_cl_train.yaml']
       },
       {
         name: 'dqn',
         task: 'classification',
-        'training config': [
+        training_config: [
           '/home/lab1523/Project/CVRL/CV-RL-PR/RL/config/dqn_cl_train.yaml'
         ],
-        'validation config': [
+        validation_config: [
           '/home/lab1523/Project/CVRL/CV-RL-PR/RL/config/dqn_cl_test.yaml'
-        ]
+        ],
+        weights: ['-RL-PR/RL/config/c51_cl_train.yaml']
       }
     ]
   });
