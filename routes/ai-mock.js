@@ -365,4 +365,34 @@ router.get('/get_cv_algocv_algo', (req, res) => {
   });
 });
 
+router.get('/get_weights', (req, res) => {
+  res.json({
+    CV: {
+      classification: {
+        ir_googlenet: './weights/ir_googlenet.pth',
+        ir_resnet: './weights/ir_resnet.pth',
+        ir_vgg: './weights/ir_vgg.pth',
+        rgb_googlenet: './weights/rgb_googlenet.pth',
+        rgb_resnet: './weights/rgb_resnet.pth',
+        rgb_vgg: './weights/rgb_vgg.pth',
+        sar_googlenet: './weights/sar_googlenet.pth',
+        sar_resnet: './weights/sar_resnet.pth',
+        sar_vgg: './weights/sar_vgg.pth'
+      },
+      preprocessing: {
+        derain: './weights/derain.pth',
+        dehaze: './weights/dehaze.pth'
+      }
+    },
+    RL: {
+      v_based: {
+        'dqn_classfication_rgb.path': './weights/dqn_classfication:rgb.pth',
+        'dqn_classfication_ir.path': './weights/dqn_classfication:ir.pth',
+        'dqn_classfication_sar.path': './weights/dqn_classfication:sar.pth',
+        'dqn_preprocessing.path': './weights/dqn_preprocessing:rgb.pth'
+      }
+    }
+  });
+});
+
 module.exports = router;
