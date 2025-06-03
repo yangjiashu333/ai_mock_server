@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs');
 const Joi = require('joi');
-const { getMockImagePath } = require('../config/paths');
+const { getMockImagePath, getMockTxtFilePath } = require('../config/paths');
 
 router.get('/datasets', (req, res) => {
   res.json(['Classification', 'Preprocessing', 'Search']);
@@ -225,6 +225,143 @@ router.get('/rl_train', (req, res) => {
     isTraining = false;
     clearInterval(trainingInterval);
     console.log(`Training stream aborted for ${algorithm_name}`);
+  });
+});
+
+router.get('/rl_test', (req, res) => {
+  const schema = Joi.object({
+    algorithm_name: Joi.string().required(),
+    validation_config: Joi.string().required(),
+    model_path: Joi.string().required(),
+    env_id: Joi.string().required(),
+    modal: Joi.string().required()
+  });
+
+  const { error, value } = schema.validate(req.query);
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      error: 'Invalid input parameters',
+      message: error.message,
+      details: error.details.map(detail => ({
+        field: detail.path.join('.'),
+        message: detail.message
+      }))
+    });
+  }
+
+  const { algorithm_name, validation_config, model_path, env_id, modal } =
+    value;
+
+  // Set SSE headers
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Cache-Control'
+  });
+
+  // Send initial connection confirmation
+  res.write(
+    `data: ${JSON.stringify({ message: 'Testing started', algorithm: algorithm_name, config: validation_config, model_path: model_path, env_id: env_id, modal: modal })}\n\n`
+  );
+
+  let step = 0;
+  let isTesting = true;
+
+  // Simulate testing data stream
+  const testingInterval = setInterval(() => {
+    if (!isTesting || res.finished) {
+      clearInterval(testingInterval);
+      return;
+    }
+
+    step++;
+
+    let responseData;
+    if (['Preprocessing', 'Classification'].includes(env_id)) {
+      // Example env_id for single image
+      responseData = {
+        image: getMockImagePath('image.png'),
+        vis_files: getMockImagePath('image.png'),
+        txt_file: getMockTxtFilePath('text.txt')
+      };
+    } else {
+      responseData = {
+        image: [getMockImagePath('image.png'), getMockImagePath('image.png')],
+        vis_files: [
+          getMockImagePath('image.png'),
+          getMockImagePath('image.png')
+        ],
+        txt_file: getMockTxtFilePath('text.txt')
+      };
+    }
+    res.write(`data: ${JSON.stringify(responseData)}\n\n`);
+
+    // Simulate testing completion after 5 steps
+    if (step >= 5) {
+      res.write(`event: end\n`);
+      res.write(`data: Stream finished\n\n`);
+      isTesting = false;
+      clearInterval(testingInterval);
+      res.end();
+    }
+  }, 1000); // Send data every second
+
+  // Handle client disconnect
+  req.on('close', () => {
+    isTesting = false;
+    clearInterval(testingInterval);
+    console.log(`Testing stream closed for ${algorithm_name}`);
+  });
+
+  req.on('aborted', () => {
+    isTesting = false;
+    clearInterval(testingInterval);
+    console.log(`Testing stream aborted for ${algorithm_name}`);
+  });
+});
+
+router.post('/get_output_vis', (req, res) => {
+  // 从request body内获取path参数
+  const path = req.body.path;
+  try {
+    const image = fs.readFileSync(path);
+    res.contentType('image/png');
+    res.send(image);
+  } catch (err) {
+    res.status(404).json({
+      success: false,
+      error: 'Image not found',
+      message: err.message
+    });
+  }
+});
+
+router.post('/get_output_txt', (req, res) => {
+  // 从request body内获取path参数
+  const path = req.body.path;
+  res.json({
+    model: 'c51',
+    path
+  });
+});
+
+router.get('/get_cv_algocv_algo', (req, res) => {
+  res.json({
+    classification: [
+      'ir_googlenet',
+      'ir_resnet',
+      'ir_vgg',
+      'rgb_googlenet',
+      'rgb_resnet',
+      'rgb_vgg',
+      'sar_googlenet',
+      'sar_resnet',
+      'sar_vgg'
+    ],
+    preprocessing: ['none', 'denoise', 'derain', 'dehaze']
   });
 });
 
