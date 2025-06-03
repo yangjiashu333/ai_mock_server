@@ -286,7 +286,7 @@ router.get('/rl_test', (req, res) => {
     step++;
 
     let responseData;
-    if (['Preprocessing', 'Classification'].includes(env_id)) {
+    if (['preprocessing', 'classification'].includes(env_id)) {
       // Example env_id for single image
       responseData = {
         image: getMockImagePath('image.png'),
