@@ -354,7 +354,7 @@ router.post('/get_output_txt', (req, res) => {
   });
 });
 
-router.get('/get_cv_algocv_algo', (req, res) => {
+router.get('/get_cv_algo', (req, res) => {
   res.json({
     classification: [
       'ir_googlenet',
@@ -399,6 +399,41 @@ router.get('/get_weights', (req, res) => {
       }
     }
   });
+});
+
+const cvInferenceSchema = Joi.object({
+  task_type: Joi.string().required(),
+  image_base64: Joi.alternatives()
+    .try(Joi.string(), Joi.array().items(Joi.string()))
+    .required(),
+  image_name: Joi.alternatives().try(
+    Joi.string(),
+    Joi.array().items(Joi.string())
+  ),
+  model_name: Joi.string().required()
+});
+
+router.post('/run_cv_inference', (req, res) => {
+  const { error, value } = cvInferenceSchema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.details[0].message
+    });
+  }
+
+  const { task_type, image_base64, image_name, model_name } = value;
+
+  const output_label = `${task_type} ${model_name} ${image_name}`;
+  setTimeout(() => {
+    res.json({
+      success: true,
+      message: 'CV inference successful',
+      label: output_label,
+      output_image_base64: image_base64
+    });
+  }, 1000);
 });
 
 module.exports = router;
