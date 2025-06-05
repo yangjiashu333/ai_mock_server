@@ -424,14 +424,15 @@ router.post('/run_cv_inference', (req, res) => {
   }
 
   const { task_type, image_base64, image_name, model_name } = value;
-
-  const output_label = `${task_type} ${model_name} ${image_name}`;
   setTimeout(() => {
     res.json({
       success: true,
       message: 'CV inference successful',
-      label: output_label,
-      output_image_base64: image_base64
+      result_text: `The task type ${task_type} image ${image_name} is classified as ${model_name}`,
+      output_image_base64: image_base64.map(item => ({
+        filename: 'test_image,png',
+        image_base64: item
+      }))
     });
   }, 1000);
 });
