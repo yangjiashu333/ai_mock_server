@@ -406,10 +406,6 @@ const cvInferenceSchema = Joi.object({
   image_base64: Joi.alternatives()
     .try(Joi.string(), Joi.array().items(Joi.string()))
     .required(),
-  image_name: Joi.alternatives().try(
-    Joi.string(),
-    Joi.array().items(Joi.string())
-  ),
   model_name: Joi.string().required()
 });
 
@@ -423,16 +419,18 @@ router.post('/run_cv_inference', (req, res) => {
     });
   }
 
-  const { task_type, image_base64, image_name, model_name } = value;
+  const { task_type, image_base64, model_name } = value;
   setTimeout(() => {
     res.json({
       success: true,
       message: 'CV inference successful',
-      result_text: `The task type ${task_type} image ${image_name} is classified as ${model_name}`,
-      output_image_base64: image_base64.map(item => ({
-        filename: 'test_image,png',
-        image_base64: item
-      }))
+      result_text: `The task type ${task_type} is classified as ${model_name}`,
+      output_image_base64: [
+        {
+          filename: 'test_image,png',
+          image_base64: image_base64
+        }
+      ]
     });
   }, 1000);
 });
