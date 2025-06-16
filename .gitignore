@@ -8,3 +8,4 @@ dist
 
 # Drizzle studio
 .drizzle
+local.db
