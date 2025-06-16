@@ -18,6 +18,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   res.status(500).send('Something broke!');
 });
 
+const unusedVariable = 123;
 const server = http.createServer(app);
 
 server.listen(port, () => {
