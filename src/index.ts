@@ -1,4 +1,4 @@
-import express, { Express, Request, Response, NextFunction } from 'express';
+import express, { Express, Request, Response } from 'express';
 import http from 'http';
 
 const app: Express = express();
@@ -13,12 +13,12 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 // Global error handler
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, req: Request, res: Response) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
 });
 
-const unusedVariable = 123;
+// A new comment to force a change
 const server = http.createServer(app);
 
 server.listen(port, () => {
