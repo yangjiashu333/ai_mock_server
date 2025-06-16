@@ -3,7 +3,7 @@ import { usersTable } from './schema';
 
 async function seedUsers() {
   try {
-    db.insert(usersTable).values([
+    await db.insert(usersTable).values([
       {
         name: 'admin',
         age: 20,

@@ -4,8 +4,9 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'prettier',
     'plugin:prettier/recommended',
+    'plugin:drizzle/recommended',
   ],
-  plugins: ['@typescript-eslint', 'prettier'],
+  plugins: ['@typescript-eslint', 'prettier', 'drizzle'],
   parserOptions: {
     ecmaVersion: 2020,
     sourceType: 'module',
@@ -15,5 +16,7 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    'drizzle/enforce-delete-with-where': 'error',
+    'drizzle/enforce-update-with-where': 'error',
   },
 };
