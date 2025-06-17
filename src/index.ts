@@ -7,7 +7,7 @@ import express, {
 } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import http from 'http';
+import { createServer } from 'node:http';
 import helmet from 'helmet';
 import routes from './routes';
 import logger from './logger';
@@ -52,7 +52,7 @@ const errorHandler: ErrorRequestHandler = (
 
 app.use(errorHandler);
 
-const server = http.createServer(app);
+const server = createServer(app);
 
 server.listen(port, () => {
   logger.info(`Server is running on port ${port}`);
